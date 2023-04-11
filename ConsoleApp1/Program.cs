@@ -1,65 +1,23 @@
 ﻿//
 
 using Microsoft.VisualBasic.FileIO;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
 internal class Program
 {
     public static void Main(string[] args)
     {
-        void chooseOption()
+        List<Employee> employees = new List<Employee>();
+        string[] allLines = File.ReadAllLines("Employees.txt");
+        for (int i = 0; i < allLines.Length; i++)
         {
-            Console.WriteLine("Choose option:");
-            Console.WriteLine($"{(int)Options.Add} - {Options.Add}");
-            Console.WriteLine($"{(int)Options.Change} - {Options.Change}");
-            Console.WriteLine($"{(int)Options.Print} - {Options.Print}");
-            Console.WriteLine($"{(int)Options.Delete} - {Options.Delete}");
-            switch (int.Parse(Console.ReadLine()))
-            {
-                case (int)Options.Add:
-                    addOption();
-                    break;
-                case (int)Options.Change:
-                    changeOption();
-                    break;
-                case (int)Options.Print:
-                    printOption();
-                    break;
-                case (int)Options.Delete:
-                    deleteOption();
-                    break;
-                default:
-                    throw new Exception("Incorrect option name");
-            }
+            string[] tmp = allLines[i].Split(" ");
+            employees.Add(new Employee(tmp[0], tmp[1], Enum.Parse<Jobs>(tmp[2])));
         }
+        bool workOn = true;
 
-        void changeOption()
-        {
-            Console.WriteLine("changeOption");
-        }
-
-        void printOption()
-        {
-            Console.WriteLine("printOption");
-            Console.WriteLine("Enter name: ");
-            Employee? result = searchEmployee(Console.ReadLine());
-            if (result != null)
-            {
-                Console.WriteLine(result);
-            }
-            else
-            {
-                Console.WriteLine("There is no such employee");
-            }
-            //StreamReader streamReader = new("Employees.txt", true);
-            //streamWriter.WriteLine(name + " " + birthDate + " " + job);
-            //streamReader.Close();
-        }
-
-        void deleteOption()
-        {
-            Console.WriteLine("deleteOption");
-        }
+        chooseOption();
 
         void addOption()
         {
@@ -70,7 +28,7 @@ internal class Program
             var birthDate = Console.ReadLine();
             //regex или 
 
-            Console.WriteLine("Enter job:"); 
+            Console.WriteLine("Enter job:");
             Console.WriteLine($"{(int)Jobs.Developer} - {Jobs.Developer}");
             Console.WriteLine($"{(int)Jobs.QA} - {Jobs.QA}");
             Console.WriteLine($"{(int)Jobs.PMO} - {Jobs.PMO}");
@@ -99,33 +57,126 @@ internal class Program
                 default:
                     throw new Exception("Incorrect job name!");
             }
-            //Console.WriteLine(File.Exists("Employees.txt"));
-            //File.AppendAllText("C:\\Users\\User\\Documents\\test.txt", name + " " + birthDate + " " + (int)job);
-
-            StreamWriter streamWriter = new("Employees.txt", true);
-            //streamWriter.WriteLine(name + " " + birthDate + " " + job);
-            streamWriter.WriteLine(new Employee(name, birthDate, job));
-            streamWriter.Close();
+            employees.Add(new Employee(name, birthDate, job));
+            Console.Write($"Added: {employees.Last()}");
         }
 
-        chooseOption();
-
-        Employee? searchEmployee(string inputName)
+        void changeOption()
         {
-            Employee?[] result = null;
-            string[] allLines = File.ReadAllLines("Employees.txt");
-            for (int i =0; i < allLines.Length; i++)
+            Console.WriteLine("changeOption");
+            Console.WriteLine("Enter name: ");
+            List<int> result = searchEmployee(Console.ReadLine());
+            Console.WriteLine("Enter new position: ");
+            Console.WriteLine($"{(int)Jobs.Developer} - {Jobs.Developer}");
+            Console.WriteLine($"{(int)Jobs.QA} - {Jobs.QA}");
+            Console.WriteLine($"{(int)Jobs.PMO} - {Jobs.PMO}");
+            Console.WriteLine($"{(int)Jobs.BA} - {Jobs.BA}");
+            Console.WriteLine($"{(int)Jobs.HR} - {Jobs.HR}");
+            employees[result[0]].Job = Enum.Parse<Jobs>(Console.ReadLine());
+            Console.Write($"Updated: {employees[result[0]]}");
+        }
+
+        void printOption()
+        {
+            Console.WriteLine("Enter name: ");
+            List<int> result = searchEmployee(Console.ReadLine());
+            for (int i=0; i < result.Count; i++)
             {
-                string[] tmp = allLines[i].Split(" ");
-                result.Append(new Employee(tmp[0], tmp[1], Enum.Parse<Jobs>(tmp[2])));
+               Console.Write(employees[result[i]]);
             }
-            for (int i=0; i < result.Length; i++)
+            if (result == null)
             {
-                if (result[i].Name == inputName)
-                    return result[i];
+                Console.WriteLine("There is no such employee");
+            }
+        }
+
+        void deleteOption()
+        {
+            Console.WriteLine("Enter name: ");
+            List<int> result = searchEmployee(Console.ReadLine());
+            for (int i = result.Count - 1; i >= 0; i--)
+            {
+                Console.Write($"Deleted: {employees[result[i]]}");
+                employees.RemoveAt(result[i]);
+            }
+            if (result.Count == 0)
+            {
+                Console.WriteLine("There is no such employee");
             }
 
-            return null;
+        }
+
+        void exitOption()
+        {
+            workOn = false;
+            Console.WriteLine("Bye!");
+            File.Delete("Employees.txt");
+            foreach(Employee employee in employees)
+            {
+                File.AppendAllText("Employees.txt", employee.ToString());
+            }
+        }
+
+        void chooseOption()
+        {
+            while (workOn)
+            {
+                Console.WriteLine("Choose option:");
+                Console.WriteLine($"{(int)Options.Add} - {Options.Add}");
+                Console.WriteLine($"{(int)Options.Change} - {Options.Change}");
+                Console.WriteLine($"{(int)Options.Print} - {Options.Print}");
+                Console.WriteLine($"{(int)Options.Delete} - {Options.Delete}");
+                Console.WriteLine($"{(int)Options.Exit} - {Options.Exit}");
+                int answer = int.Parse(Console.ReadLine());
+                switch (answer)
+                {
+                    case (int)Options.Add:
+                        addOption();
+                        break;
+                    case (int)Options.Change:
+                        changeOption();
+                        break;
+                    case (int)Options.Print:
+                        printOption();
+                        break;
+                    case (int)Options.Delete:
+                        deleteOption();
+                        break;
+                    case (int) Options.Exit:
+                        exitOption();
+                        break;
+                    default:
+                        throw new Exception("Incorrect option name");
+                }
+            }
+        }
+
+        List<int> searchEmployee(string inputName)
+        {
+            List<int> result = new List<int>();
+            for (int i = 0; i < employees.Count; i++)
+            {
+                if (employees[i].Name == inputName)
+                    result.Add(i);
+            }
+            return result;
+        }
+        string? enterName()
+        {
+            Console.WriteLine("Enter name: ");
+            string? name = null;
+            try {
+                name = Console.ReadLine();
+                if (name.All(char.IsLetter)){
+                    throw new Exception("Incorrect name!");
+                }
+            }
+            catch (Exception e) 
+            {
+                Console.WriteLine(e);
+            }
+            return name;
+               
         }
     }
 
@@ -160,7 +211,7 @@ internal class Program
 
         public override string ToString()
         {
-            return Name + " " + Date + " " + Job;
+            return Name + " " + Date + " " + Job + "\n";
         }
     }
 }
@@ -176,6 +227,7 @@ enum Jobs
 
 enum Options
 {
+    Exit = 0,
     Add = 1,
     Change = 2,
     Print = 3,

@@ -7,4 +7,13 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Reference Include="Aspose.Cells">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Aspose\Aspose.Cells for .NET\Bin\net6.0-windows\Aspose.Cells.dll</HintPath>
+    </Reference>
+    <Reference Include="Aspose.Cells.GridWeb">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Aspose\Aspose.Cells for .NET\Bin\net6.0-windows\Aspose.Cells.GridWeb.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

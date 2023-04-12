@@ -4,6 +4,9 @@ using Microsoft.VisualBasic.FileIO;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using System.Xml.Serialization;
+using Aspose.Cells;
+
 
 internal class Program
 {
@@ -17,8 +20,8 @@ internal class Program
             employees.Add(new Employee(tmp[0], tmp[1], Enum.Parse<Jobs>(tmp[2])));
         }
         bool workOn = true;
-
-        chooseOption();
+        excelFileInformation();
+        chooseOption(); 
 
 
         //------------------------------------------------------------------------
@@ -185,6 +188,10 @@ internal class Program
             Console.WriteLine($"{(int)Jobs.HR} - {Jobs.HR}");
         }
         
+        void excelFileInformation()
+        {
+            Workbook workbook = new Workbook("Employees.xlsx");
+        }
     }
 
     public class Employee

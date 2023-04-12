@@ -1,6 +1,7 @@
 ﻿//
 
 using Microsoft.VisualBasic.FileIO;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
@@ -19,67 +20,31 @@ internal class Program
 
         chooseOption();
 
+
+        //------------------------------------------------------------------------
+
         void addOption()
         {
-            Console.WriteLine("Enter name: ");
-            var name = Console.ReadLine();
+            var name = enterName();
+            var birthDate = enterBirthDate();
 
-            Console.WriteLine("Enter birth date: ");
-            var birthDate = Console.ReadLine();
-            //regex или 
-
-            Console.WriteLine("Enter job:");
-            Console.WriteLine($"{(int)Jobs.Developer} - {Jobs.Developer}");
-            Console.WriteLine($"{(int)Jobs.QA} - {Jobs.QA}");
-            Console.WriteLine($"{(int)Jobs.PMO} - {Jobs.PMO}");
-            Console.WriteLine($"{(int)Jobs.BA} - {Jobs.BA}");
-            Console.WriteLine($"{(int)Jobs.HR} - {Jobs.HR}");
-            int jobName = int.Parse(Console.ReadLine());
-            Jobs job;
-
-            switch (jobName)
-            {
-                case (int)Jobs.Developer:
-                    job = Jobs.Developer;
-                    break;
-                case (int)Jobs.QA:
-                    job = Jobs.QA;
-                    break;
-                case (int)Jobs.PMO:
-                    job = Jobs.PMO;
-                    break;
-                case (int)Jobs.BA:
-                    job = Jobs.BA;
-                    break;
-                case (int)Jobs.HR:
-                    job = Jobs.HR;
-                    break;
-                default:
-                    throw new Exception("Incorrect job name!");
-            }
-            employees.Add(new Employee(name, birthDate, job));
+            enterJob("Enter job: ");
+            
+            employees.Add(new Employee(name, birthDate, Enum.Parse<Jobs>(Console.ReadLine())));
             Console.Write($"Added: {employees.Last()}");
         }
 
         void changeOption()
         {
-            Console.WriteLine("changeOption");
-            Console.WriteLine("Enter name: ");
-            List<int> result = searchEmployee(Console.ReadLine());
-            Console.WriteLine("Enter new position: ");
-            Console.WriteLine($"{(int)Jobs.Developer} - {Jobs.Developer}");
-            Console.WriteLine($"{(int)Jobs.QA} - {Jobs.QA}");
-            Console.WriteLine($"{(int)Jobs.PMO} - {Jobs.PMO}");
-            Console.WriteLine($"{(int)Jobs.BA} - {Jobs.BA}");
-            Console.WriteLine($"{(int)Jobs.HR} - {Jobs.HR}");
+            List<int> result = searchEmployee(enterName());
+            enterJob("Enter new position: ");
             employees[result[0]].Job = Enum.Parse<Jobs>(Console.ReadLine());
             Console.Write($"Updated: {employees[result[0]]}");
         }
 
         void printOption()
         {
-            Console.WriteLine("Enter name: ");
-            List<int> result = searchEmployee(Console.ReadLine());
+            List<int> result = searchEmployee(enterName());
             for (int i=0; i < result.Count; i++)
             {
                Console.Write(employees[result[i]]);
@@ -92,8 +57,7 @@ internal class Program
 
         void deleteOption()
         {
-            Console.WriteLine("Enter name: ");
-            List<int> result = searchEmployee(Console.ReadLine());
+            List<int> result = searchEmployee(enterName());
             for (int i = result.Count - 1; i >= 0; i--)
             {
                 Console.Write($"Deleted: {employees[result[i]]}");
@@ -161,23 +125,66 @@ internal class Program
             }
             return result;
         }
+
         string? enterName()
         {
             Console.WriteLine("Enter name: ");
             string? name = null;
             try {
                 name = Console.ReadLine();
-                if (name.All(char.IsLetter)){
-                    throw new Exception("Incorrect name!");
+                if (!name.All(char.IsLetter)){
+                    throw new Exception("Incorrect name! Use only letters!");
                 }
             }
             catch (Exception e) 
             {
                 Console.WriteLine(e);
+                return enterName();
             }
-            return name;
-               
+            return name;  
         }
+
+        string? enterBirthDate()
+        {
+            Console.WriteLine("Enter birth date in DD/MM/YYYY format: ");
+            string? birthDate = null;
+            DateTime dt;
+            try
+            {
+                birthDate = Console.ReadLine();
+                
+                if (!(DateTime.TryParseExact(birthDate, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt)))
+                {
+                    throw new Exception("Incorrect birth date!");
+                }
+                int age = DateTime.Now.Year - dt.Year;
+                if (DateTime.Now.Month < dt.Month || (DateTime.Now.Month == dt.Month && DateTime.Now.Day < dt.Day))
+                {
+                    --age;
+                }
+                if (age < 18)
+                {
+                    throw new Exception("Age is under 18!");
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return enterBirthDate();
+            }
+            return birthDate;
+        }
+
+        void enterJob(string msg)
+        {
+            Console.WriteLine(msg);
+            Console.WriteLine($"{(int)Jobs.Developer} - {Jobs.Developer}");
+            Console.WriteLine($"{(int)Jobs.QA} - {Jobs.QA}");
+            Console.WriteLine($"{(int)Jobs.PMO} - {Jobs.PMO}");
+            Console.WriteLine($"{(int)Jobs.BA} - {Jobs.BA}");
+            Console.WriteLine($"{(int)Jobs.HR} - {Jobs.HR}");
+        }
+        
     }
 
     public class Employee
@@ -192,7 +199,6 @@ internal class Program
             this.date = date;
             this.job = job;
         }
-
         public string Name
         {
             get { return name;}
@@ -208,7 +214,6 @@ internal class Program
             get { return job;}
             set { job = value;}
         }
-
         public override string ToString()
         {
             return Name + " " + Date + " " + Job + "\n";

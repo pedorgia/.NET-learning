@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="Aspose.Cells">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Aspose\Aspose.Cells for .NET\Bin\net6.0-windows\Aspose.Cells.dll</HintPath>
     </Reference>

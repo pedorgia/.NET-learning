@@ -13,6 +13,9 @@ internal class Program
     public static void Main(string[] args)
     {
         List<Employee> employees = new List<Employee>();
+        List<string> names = new List<string>();
+        List<string> birthDates = new List<string>();
+        List<string> jobs = new List<string>();
         string[] allLines = File.ReadAllLines("Employees.txt");
         for (int i = 0; i < allLines.Length; i++)
         {
@@ -20,9 +23,9 @@ internal class Program
             employees.Add(new Employee(tmp[0], tmp[1], Enum.Parse<Jobs>(tmp[2])));
         }
         bool workOn = true;
+        
+        chooseOption();
         excelFileInformation();
-        chooseOption(); 
-
 
         //------------------------------------------------------------------------
 
@@ -116,6 +119,7 @@ internal class Program
                         throw new Exception("Incorrect option name");
                 }
             }
+            divideIntoThreeArrays();
         }
 
         List<int> searchEmployee(string inputName)
@@ -187,10 +191,27 @@ internal class Program
             Console.WriteLine($"{(int)Jobs.BA} - {Jobs.BA}");
             Console.WriteLine($"{(int)Jobs.HR} - {Jobs.HR}");
         }
+
+        void divideIntoThreeArrays()
+        {
+            for (int i=0; i<employees.Count; i++)
+            {
+                Console.WriteLine(employees[i].Name);
+                names.Add(employees[i].Name);
+                birthDates.Add(employees[i].Date);
+                jobs.Add(employees[i].Job.ToString());
+            }
+        }
         
         void excelFileInformation()
         {
             Workbook workbook = new Workbook("Employees.xlsx");
+            var worksheet = workbook.Worksheets[0];
+            Console.WriteLine(worksheet.Cells["A1"]);
+            worksheet.Cells.ImportArray(names.ToArray(), 0, 0, true);
+            worksheet.Cells.ImportArray(birthDates.ToArray(), 0, 1, true);
+            worksheet.Cells.ImportArray(jobs.ToArray(), 0, 2, true);
+            workbook.Save("Employees.xlsx");
         }
     }
 
